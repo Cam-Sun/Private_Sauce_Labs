@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="robots" content="noindex">
@@ -26,17 +26,46 @@
       var pathSegmentsToKeep = 0;
 
       var l = window.location;
-      // Don't redirect for these pages
-      if(l.pathname.indexOf('v1') !== 1 && l.pathname.indexOf('storybook') !== 1){
-        l.replace(
-          l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-          l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-          l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-          (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-          l.hash
-        );
-      }
 
+      // If the path is explicitly for storybook, don't touch it
+      if (l.pathname.indexOf('/storybook') !== 0) {
+        // Build origin
+        var origin = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '');
+
+        // Split pathname into segments (skip leading empty segment from the leading slash)
+        var segments = l.pathname.split('/').filter(function (s) { return s.length > 0; });
+
+        // Keep the first `pathSegmentsToKeep` segments as the base (for project pages)
+        var baseSegments = segments.slice(0, pathSegmentsToKeep);
+        var routeSegments = segments.slice(pathSegmentsToKeep);
+
+        // Rebuild base path (leading slash only if there are base segments)
+        var base = baseSegments.length ? '/' + baseSegments.join('/') : '';
+
+        // Redirect when the pathname contains '/v1' (case-insensitive) per request
+        var containsV1 = l.pathname && l.pathname.toLowerCase().indexOf('/v1') !== -1;
+
+        if (containsV1) {
+          var redirectUrlRoot = origin + base + '/?/';
+          l.replace(redirectUrlRoot);
+        } else {
+          // No 'v1' found: proceed with the normal SPA redirect behavior
+          // Remove any exact 'v1' path segments just in case (no-op if none exist)
+          var filteredRouteSegments = routeSegments.filter(function (s) { return s !== 'v1'; });
+
+          // Encode route and original search by replacing & with ~and~ (keeps compatibility with SPA decoding)
+          var encodedRoute = filteredRouteSegments.join('/').replace(/&/g, '~and~');
+          var encodedSearch = l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '';
+          var hash = l.hash || '';
+
+          // Construct redirect URL. If there is no base (site root), base is '', so this becomes origin + '/?/'...
+          var redirectUrlFull = origin + base + '/?/' + encodedRoute + encodedSearch + hash;
+
+          l.replace(redirectUrlFull);
+        }
+      } else {
+        // Do not redirect storybook paths
+      }
     </script>
 </head>
 <body>
