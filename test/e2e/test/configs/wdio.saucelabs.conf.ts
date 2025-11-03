@@ -79,8 +79,9 @@ config.services = config.services.concat([
     ['sauce', {
         sauceConnect: true,
         sauceConnectOpts: {
-            logfile: './sc.log',
+            logFile: './sc.log',
             logLevel: 'debug',
+            proxyLocalhost: 'allow'
         }
     }],
     'shared-store'

@@ -18,13 +18,13 @@ export const config: Options.Testrunner = {
   // ============
   // Capabilities
   // ============
-  maxInstances: 20,
+  maxInstances: 100,
   // capabilities can be found in the `wdio.local.chrome.conf.ts` or `wdio.saucelabs.conf.ts`
   capabilities: [],
   // ===================
   // Test Configurations
   // ===================
-  logLevel: 'silent',
+  logLevel: 'warn',
   bail: 0,
   baseUrl: 'http://localhost:3000',
   waitforTimeout: 10000,
