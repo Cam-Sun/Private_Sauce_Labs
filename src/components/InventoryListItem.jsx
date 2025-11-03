@@ -6,6 +6,7 @@ import { isErrorUser, isProblemUser } from "../utils/Credentials";
 import "./InventoryListItem.css";
 import { ROUTES } from "../utils/Constants";
 import Button, { BUTTON_SIZES, BUTTON_TYPES } from "./Button";
+import getImage from "../utils/imageLoader";
 
 const InventoryListItem = (props) => {
   const {
@@ -19,9 +20,9 @@ const InventoryListItem = (props) => {
     price,
   } = props;
   const [itemInCart, setItemInCart] = useState(ShoppingCart.isItemInCart(id));
-  const images = require.context('../assets/img', false, /\.(png|jpe?g|svg|gif)$/);
+  const imgSrc = getImage(image_url);
 
-    /**
+  /**
    * @TODO:
    * This can't be tested yet because enzyme currently doesn't support ReactJS17,
    * see https://github.com/enzymejs/enzyme/issues/2429.
@@ -105,9 +106,6 @@ const InventoryListItem = (props) => {
   const itemNameClass = `inventory_item_name ${
     isTextAlignRight ? "align_right" : ""
   }`;
-
-  const imgModule = images(`./${image_url}`);
-  const imgSrc = imgModule && (imgModule.default || imgModule);
 
   return (
     <div className="inventory_item" data-test="inventory-item">
