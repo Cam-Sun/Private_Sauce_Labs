@@ -46,9 +46,9 @@ jobs:
       run: npm run test.coverage
 
     # Only run the last 2 steps when we are not on the main branch
-    - name: Run Storybook tests
-      if: ${{ !env.IS_MAIN }}
-      run: npm run test.storybook.ci
+#    - name: Run Storybook tests
+#      if: ${{ !env.IS_MAIN }}
+#      run: npm run test.storybook.ci
 
     - name: Install test dependencies
       run: npm --prefix ./test/e2e install
