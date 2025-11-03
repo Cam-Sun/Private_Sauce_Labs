@@ -7,13 +7,17 @@ config.capabilities = [
   // Chrome example
   {
     browserName: 'chrome',
-    'goog:chromeOptions': {
-      args: [
-        '--no-sandbox',
-        '--disable-infobars',
-        '--headless',
-      ],
-    },
+      'goog:chromeOptions': {
+          args: [
+              '--no-sandbox',
+              '--disable-infobars',
+              '--disable-features=SafeBrowsing,PasswordLeakToggleMove',
+              '--headless',
+          ],
+          prefs: {
+              'profile.password_manager_leak_detection': false,
+          }
+      },
 
   },
 ];

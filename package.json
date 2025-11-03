@@ -78,7 +78,8 @@
   "jest": {
     "coveragePathIgnorePatterns": [
       "<rootDir>/src/jest.setupTextEncoder.js",
-      "<rootDir>/src/setupTests.js"
+      "<rootDir>/src/setupTests.js",
+      "<rootDir>/src/storybook/StoryRouter.js"
     ],
     "collectCoverageFrom": [
       "src/**/*.{js,jsx,ts,tsx}",
