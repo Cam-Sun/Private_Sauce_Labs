@@ -108,41 +108,61 @@ config.after = async (result, capabilities, specs) => {
   const specFileNamePath = specs[0];
   const RETRIED_SPECS_KEY = 'retriedSpecs';
 
-  // If the retriedSpecs array was not already created, then create it
-  if (!browser.sharedStore.get(RETRIED_SPECS_KEY)) {
-    browser.sharedStore.set(RETRIED_SPECS_KEY, []);
-  }
+  // Helper to safely read/normalize the retried specs from sharedStore
+  const getRetriedSpecs = async (): Promise<RetriedSpecsType> => {
+    const maybe = await browser.sharedStore.get(RETRIED_SPECS_KEY) as unknown;
+    // If it's already an array, return it
+    if (Array.isArray(maybe)) return maybe as RetriedSpecsType;
+    // If it's falsy, initialize and return empty array
+    if (!maybe) {
+      await browser.sharedStore.set(RETRIED_SPECS_KEY, []);
+      return [] as RetriedSpecsType;
+    }
+    // If it's an object that looks like a numeric-indexed map or values container, coerce to array
+    if (typeof maybe === 'object') {
+      try {
+        const vals = Object.values(maybe) as RetriedSpecsType;
+        if (Array.isArray(vals)) {
+          // Persist normalized array back to the store for future callers
+          await browser.sharedStore.set(RETRIED_SPECS_KEY, vals);
+          return vals;
+        }
+      } catch (e) {
+        // fall through to reset
+      }
+    }
+    // Fallback: reset to an empty array to avoid runtime issues
+    await browser.sharedStore.set(RETRIED_SPECS_KEY, []);
+    return [] as RetriedSpecsType;
+  };
 
   // The test failed and should be retried
   // Store the retry spec on the global scope
-  if (
-    'specFileRetries' in browser.config &&
-    browser.config.specFileRetries > 0 &&
-    result === 1
-  ) {
-    const retriedSpecs = browser.sharedStore.get(
-      RETRIED_SPECS_KEY
-    ) as RetriedSpecsType;
-    retriedSpecs.push({
-      sessionId: browser.sessionId,
-      specFileNamePath,
-    });
-    browser.sharedStore.set(RETRIED_SPECS_KEY, retriedSpecs);
+  {
+    const cfg = config as any;
+    // Use a safe check rather than `"specFileRetries" in cfg` because `cfg` may be undefined
+    if (cfg?.specFileRetries > 0 && result === 1) {
+      const retriedSpecs = await getRetriedSpecs();
+      retriedSpecs.push({
+        sessionId: browser.sessionId,
+        specFileNamePath,
+      });
+      await browser.sharedStore.set(RETRIED_SPECS_KEY, retriedSpecs);
+    }
   }
 
   // When the test succeeds
   if (result === 0) {
     // Find the test that failed before
-    const matchingSession = (
-      browser.sharedStore.get(RETRIED_SPECS_KEY) as RetriedSpecsType
-    ).find((retriedSpec) => retriedSpec.specFileNamePath === specFileNamePath);
+    const retriedSpecs = await getRetriedSpecs();
+    const matchingSession = retriedSpecs.find((retriedSpec) => retriedSpec.specFileNamePath === specFileNamePath);
     // If there is a matching session
     if (matchingSession) {
       // Then update the test in Sauce Labs with the API
       const api = new SauceLabs({
-        user: browser.config.user,
-        key: browser.config.key,
-        region: browser.config.region,
+        user: process.env.SAUCE_USERNAME,
+        key: process.env.SAUCE_ACCESS_KEY,
+        region: (config as any).region,
       });
       // We need to get the name of the job to be able to pre and post fix it
       const jobData = await api.getJob(

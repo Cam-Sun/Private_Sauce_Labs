@@ -50,6 +50,8 @@ jobs:
       if: ${{ !env.IS_MAIN }}
       run: npm run test.storybook.ci
 
+    - name: Install test dependencies
+      run: npm --prefix ./test/e2e/test install
+
     - name: Build and E2E test the site
-      if: ${{ !env.IS_MAIN }}
-      run: npm run start & npx wait-on --timeout 60000 http://localhost:3000 && npm run test.e2e.sauce.us
+      run: npm run start & npx wait-on --timeout 60000 http://localhost:3000 && npm --prefix ./test/e2e/test run test.saucelabs.us
