@@ -45,11 +45,6 @@ jobs:
     - name: Run Unit Tests and generate coverage report
       run: npm run test.coverage
 
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v1
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-
     # Only run the last 2 steps when we are not on the main branch
     - name: Run Storybook tests
       if: ${{ !env.IS_MAIN }}
