@@ -5,12 +5,9 @@ import { isLoggedIn } from "../utils/Credentials";
 import { ROUTES } from "../utils/Constants";
 
 /**
- * @TODO: This can't be tested yet because enzyme currently doesn't support ReactJS17,
- * see https://github.com/enzymejs/enzyme/issues/2429.
- * This means we can't fully mount the component and test all rendered components
- * and functions
+ * PrivateRoute - renders `component` when `isLoggedIn()` is true, otherwise
+ * redirects to LOGIN while preserving the attempted location in location.state
  */
-/* istanbul ignore next */
 const PrivateRoute = ({ component: Component, ...rest }) => {
   return (
     <Route
@@ -27,14 +24,14 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
     />
   );
 };
-/* istanbul ignore next */
+
 PrivateRoute.propTypes = {
   /**
-   * A react component
+   * A react component (element type)
    */
-  component: PropTypes.element,
+  component: PropTypes.oneOfType([PropTypes.elementType, PropTypes.func, PropTypes.object]),
 };
-/* istanbul ignore next */
+
 PrivateRoute.defaultProps = {
   customClass: undefined,
   secondaryHeaderBot: undefined,

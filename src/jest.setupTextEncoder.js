@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 // javascript
 // File: `src/jest.setupTextEncoder.js`
 // Robustly polyfill TextEncoder / TextDecoder for Jest/Node environments.
