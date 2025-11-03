@@ -1,5 +1,5 @@
 import React from "react";
-import StoryRouter from "storybook-react-router";
+import StoryRouter from "../StoryRouter";
 import CartItem from "../../components/CartItem";
 
 export default {

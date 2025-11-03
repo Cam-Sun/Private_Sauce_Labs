@@ -1,11 +1,17 @@
+// Minimal Storybook main configuration to force webpack5 builder
 module.exports = {
-  "stories": [
-    "../src/storybook/**/*.stories.mdx",
-    "../src/storybook/**/*.stories.@(js|jsx|ts|tsx)"
-  ],
-  "addons": [
-    "@storybook/addon-links",
+  core: {
+    builder: "webpack5",
+  },
+  stories: ["../src/**/*.stories.@(js|jsx|ts|tsx)"],
+  addons: [
     "@storybook/addon-essentials",
-    "@storybook/preset-create-react-app"
-  ]
-}
+    "@storybook/addon-links",
+    "@storybook/addon-actions"
+  ],
+  framework: {
+    name: "@storybook/react",
+    options: {}
+  }
+};
+
