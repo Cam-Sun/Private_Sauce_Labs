@@ -42,15 +42,12 @@
         // Rebuild base path (leading slash only if there are base segments)
         var base = baseSegments.length ? '/' + baseSegments.join('/') : '';
 
-        // If the URL contains 'v1' anywhere (pathname, search, or hash), redirect to root
-        // Use case-insensitive matching: lowercase the components before searching
-        var containsV1 = (l.pathname && l.pathname.toLowerCase().indexOf('v1') !== -1) ||
-                         (l.search && l.search.toLowerCase().indexOf('v1') !== -1) ||
-                         (l.hash && l.hash.toLowerCase().indexOf('v1') !== -1);
+        // Redirect only when the pathname contains '/v1/' (case-insensitive) per request
+        var containsV1 = l.pathname && l.pathname.toLowerCase().indexOf('/v1/') !== -1;
 
         if (containsV1) {
-          var redirectUrl = origin + base + '/?/';
-          l.replace(redirectUrl);
+          var redirectUrlRoot = origin + base + '/?/';
+          l.replace(redirectUrlRoot);
         } else {
           // No 'v1' found: proceed with the normal SPA redirect behavior
           // Remove any exact 'v1' path segments just in case (no-op if none exist)
@@ -62,9 +59,9 @@
           var hash = l.hash || '';
 
           // Construct redirect URL. If there is no base (site root), base is '', so this becomes origin + '/?/'...
-          var redirectUrl = origin + base + '/?/' + encodedRoute + encodedSearch + hash;
+          var redirectUrlFull = origin + base + '/?/' + encodedRoute + encodedSearch + hash;
 
-          l.replace(redirectUrl);
+          l.replace(redirectUrlFull);
         }
       } else {
         // Do not redirect storybook paths
