@@ -61,64 +61,55 @@ if (typeof globalThis !== 'undefined') {
 }
 
 // Polyfill basic MessagePort/MessageChannel/MessageEvent used by some web libs (undici, cheerio)
+// Use an in-process lightweight implementation to avoid creating real worker_threads ports
+// which can keep the Node process alive and produce Jest open-handle warnings.
 let MessagePortImpl, MessageChannelImpl, MessageEventImpl;
 
-try {
-    const wt = require('worker_threads');
-    if (wt && wt.MessagePort) MessagePortImpl = wt.MessagePort;
-    if (wt && wt.MessageChannel) MessageChannelImpl = wt.MessageChannel;
-    // worker_threads doesn't export MessageEvent; leave to native if present
-} catch (err) {
-    // ignore
+// Minimal in-process polyfill
+class _MessagePort {
+    constructor() {
+        this._onmessage = null;
+        this._listeners = new Map();
+        this._target = null; // set by MessageChannel
+    }
+    postMessage(msg) {
+        // deliver async to mimic real ports
+        const target = this._target;
+        if (!target) return;
+        setTimeout(() => {
+            const ev = { data: msg };
+            if (typeof target._onmessage === 'function') target._onmessage(ev);
+            const listeners = target._listeners.get('message');
+            if (listeners) listeners.forEach(fn => fn.call(target, ev));
+        }, 0);
+    }
+    addEventListener(type, fn) {
+        if (!this._listeners.has(type)) this._listeners.set(type, new Set());
+        this._listeners.get(type).add(fn);
+    }
+    removeEventListener(type, fn) {
+        const s = this._listeners.get(type);
+        if (s) s.delete(fn);
+    }
+    start() {}
+    close() { this._listeners.clear(); this._onmessage = null; this._target = null; }
+    // compatibility property
+    set onmessage(fn) { this._onmessage = fn; }
+    get onmessage() { return this._onmessage; }
 }
 
-if (!MessagePortImpl || !MessageChannelImpl) {
-    // Minimal in-process polyfill
-    class _MessagePort {
-        constructor() {
-            this._onmessage = null;
-            this._listeners = new Map();
-            this._target = null; // set by MessageChannel
-        }
-        postMessage(msg) {
-            // deliver async to mimic real ports
-            const target = this._target;
-            if (!target) return;
-            setTimeout(() => {
-                const ev = { data: msg };
-                if (typeof target._onmessage === 'function') target._onmessage(ev);
-                const listeners = target._listeners.get('message');
-                if (listeners) listeners.forEach(fn => fn.call(target, ev));
-            }, 0);
-        }
-        addEventListener(type, fn) {
-            if (!this._listeners.has(type)) this._listeners.set(type, new Set());
-            this._listeners.get(type).add(fn);
-        }
-        removeEventListener(type, fn) {
-            const s = this._listeners.get(type);
-            if (s) s.delete(fn);
-        }
-        start() {}
-        close() { this._listeners.clear(); }
-        // compatibility property
-        set onmessage(fn) { this._onmessage = fn; }
-        get onmessage() { return this._onmessage; }
+class _MessageChannel {
+    constructor() {
+        this.port1 = new _MessagePort();
+        this.port2 = new _MessagePort();
+        this.port1._target = this.port2;
+        this.port2._target = this.port1;
     }
-
-    class _MessageChannel {
-        constructor() {
-            this.port1 = new _MessagePort();
-            this.port2 = new _MessagePort();
-            this.port1._target = this.port2;
-            this.port2._target = this.port1;
-        }
-    }
-
-    MessagePortImpl = _MessagePort;
-    MessageChannelImpl = _MessageChannel;
-    MessageEventImpl = function MessageEvent(type, opts) { this.type = type; this.data = opts && opts.data; };
 }
+
+MessagePortImpl = _MessagePort;
+MessageChannelImpl = _MessageChannel;
+MessageEventImpl = function MessageEvent(type, opts) { this.type = type; this.data = opts && opts.data; };
 
 if (typeof global !== 'undefined') {
     if (typeof global.MessagePort === 'undefined') global.MessagePort = MessagePortImpl;
