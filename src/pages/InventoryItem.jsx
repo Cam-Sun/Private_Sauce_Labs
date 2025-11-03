@@ -42,6 +42,9 @@ const InventoryItem = (props) => {
   }
 
   item.id = inventoryId;
+  const images = require.context('../assets/img', false, /\.(png|jpe?g|svg|gif)$/);
+  const imgModule = images(`./${item.image_url}`);
+  const imgSrc = imgModule && (imgModule.default || imgModule);
 
   const [itemInCart, setItemInCart] = useState(
     ShoppingCart.isItemInCart(inventoryId)
@@ -160,7 +163,7 @@ const InventoryItem = (props) => {
                 <img
                   alt={item.name}
                   className="inventory_details_img"
-                  src={require(`../assets/img/${item.image_url}`).default}
+                  src={imgSrc}
                   data-test={`item-${item.name
                     .replace(/\s+/g, "-")
                     .toLowerCase()}-img`}

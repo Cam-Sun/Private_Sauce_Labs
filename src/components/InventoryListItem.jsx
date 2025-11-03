@@ -19,7 +19,9 @@ const InventoryListItem = (props) => {
     price,
   } = props;
   const [itemInCart, setItemInCart] = useState(ShoppingCart.isItemInCart(id));
-  /**
+  const images = require.context('../assets/img', false, /\.(png|jpe?g|svg|gif)$/);
+
+    /**
    * @TODO:
    * This can't be tested yet because enzyme currently doesn't support ReactJS17,
    * see https://github.com/enzymejs/enzyme/issues/2429.
@@ -104,6 +106,9 @@ const InventoryListItem = (props) => {
     isTextAlignRight ? "align_right" : ""
   }`;
 
+  const imgModule = images(`./${image_url}`);
+  const imgSrc = imgModule && (imgModule.default || imgModule);
+
   return (
     <div className="inventory_item" data-test="inventory-item">
       <div className="inventory_item_img">
@@ -119,7 +124,7 @@ const InventoryListItem = (props) => {
           <img
             alt={name}
             className="inventory_item_img"
-            src={require(`../assets/img/${image_url}`).default}
+            src={imgSrc}
             data-test={`inventory-item-${name
               .replace(/\s+/g, "-")
               .toLowerCase()}-img`}
@@ -195,11 +200,11 @@ InventoryListItem.propTypes = {
    */
   price: PropTypes.number.isRequired,
   /**
-   * Whether or not the item is aligned right
+   * Whether the item is aligned right
    */
   isTextAlignRight: PropTypes.bool.isRequired,
   /**
-   * Whether or not the the button is misaligned
+   * Whether the button is misaligned
    */
   missAlignButton: PropTypes.bool.isRequired,
 };
