@@ -51,7 +51,7 @@ jobs:
       run: npm run test.storybook.ci
 
     - name: Install test dependencies
-      run: npm --prefix ./test/e2e/test install
+      run: npm --prefix ./test/e2e install
 
     - name: Build and E2E test the site
-      run: npm run start & npx wait-on --timeout 60000 http://localhost:3000 && npm --prefix ./test/e2e/test run test.saucelabs.us
+      run: npm run start & npx wait-on --timeout 60000 http://localhost:3000 && npm --prefix ./test/e2e run test.saucelabs.us
