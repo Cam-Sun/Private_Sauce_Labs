@@ -42,8 +42,8 @@
         // Rebuild base path (leading slash only if there are base segments)
         var base = baseSegments.length ? '/' + baseSegments.join('/') : '';
 
-        // Redirect only when the pathname contains '/v1/' (case-insensitive) per request
-        var containsV1 = l.pathname && l.pathname.toLowerCase().indexOf('/v1/') !== -1;
+        // Redirect when the pathname contains '/v1' (case-insensitive) per request
+        var containsV1 = l.pathname && l.pathname.toLowerCase().indexOf('/v1') !== -1;
 
         if (containsV1) {
           var redirectUrlRoot = origin + base + '/?/';
