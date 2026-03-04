@@ -25,7 +25,7 @@ jobs: # Define the jobs (tasks) the workflow will perform
       run: CI=false npm run build
 
     - name: Run Unit Tests and generate coverage report # Execute code
-      uses: npm run test.coverage
+      run: npm run test.coverage
 
 
     
