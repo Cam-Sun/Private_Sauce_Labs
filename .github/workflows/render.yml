@@ -2,9 +2,9 @@ name: CI # Give your workflow a name
 
 on: 
   push: # Run workflow on every push
-    branches:[main]
+    branches: [ main ]
   pull_request:
-    branches:[main]
+    branches: [ main ]
 
 jobs: # Define the jobs (tasks) the workflow will perform
   build:
