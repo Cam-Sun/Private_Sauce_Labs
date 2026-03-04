@@ -1,0 +1,30 @@
+name: CI # Give your workflow a name
+
+on: 
+  push: # Run workflow on every push
+    branches:[main]
+  pull_request:
+    branches:[main]
+
+jobs: # Define the jobs (tasks) the workflow will perform
+  build:
+    runs-on: ubuntu-latest # Specify the OS to run the job on
+    steps: # Steps inside this job
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+
+    - name: Install dependencies
+      uses: npm install
+    
+    - name: Run tests # Execute code
+      uses: npm run test.coverage
+
+
+    
+
+    
+
+
