@@ -18,9 +18,11 @@ jobs: # Define the jobs (tasks) the workflow will perform
       with:
           node-version: '22.x'
 
-    - name: Install dependencies
-      run: npm install
-    
+    # - name: Install dependencies
+    #   run: npm install
+
+
+
     # - name: Run tests # Execute code
     #   uses: npm run test.coverage
 
