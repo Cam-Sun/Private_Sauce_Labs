@@ -2,9 +2,9 @@ name: CI # Give your workflow a name
 
 on: 
   push: # Run workflow on every push
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [ main ] # Test code before merging
+  # pull_request:
+  #   branches: [ main ] 
 
 jobs: # Define the jobs (tasks) the workflow will perform
   build:
@@ -21,9 +21,8 @@ jobs: # Define the jobs (tasks) the workflow will perform
     - name: Install dependencies
       run: npm install
 
-
-    # - name: Run tests # Execute code
-    #   uses: npm run test.coverage
+    - name: Run Unit Tests and generate coverage report # Execute code
+      uses: npm run test.coverage
 
 
     
