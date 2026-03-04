@@ -15,9 +15,12 @@ jobs: # Define the jobs (tasks) the workflow will perform
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
+      with:
+          node-version: '22.x'
 
     - name: Install dependencies
       uses: npm install
+      
     
     - name: Run tests # Execute code
       uses: npm run test.coverage
