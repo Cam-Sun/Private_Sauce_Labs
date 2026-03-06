@@ -1,6 +1,6 @@
 {
   "name": "sample-app-web",
-  "homepage": "https://cam-sun.github.io/Private_Sauce_Labs",
+  "homepage": "https://cam-sun.github.io/Private_Sauce_Labs/",
   "version": "3.0.0",
   "private": true,
   "dependencies": {
@@ -50,6 +50,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "deploy":"gh-pages -d build",
     "test.coverage": "react-scripts test --coverage --watchAll=false",
     "test.coverage.watch": "react-scripts test --coverage --watchAll",
     "test.lint": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
