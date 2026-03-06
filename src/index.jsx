@@ -36,7 +36,7 @@ BacktraceClient.initialize({
 
 const routing = (
   <ErrorBoundary>
-    <Router>
+    <Router basename={process.env.PUBLIC_URL}>
       <Route exact path={ROUTES.LOGIN} component={Login} />
       <PrivateRoute path={ROUTES.INVENTORY} component={(props) => <Inventory data={InventoryData} {...props}/>} />
       <PrivateRoute path={ROUTES.INVENTORY_LONG} component={(props) => <Inventory data={InventoryDataLong} {...props}/>} />
