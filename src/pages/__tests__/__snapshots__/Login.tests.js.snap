@@ -7,7 +7,7 @@ exports[`Login should render correctly 1`] = `
   <div
     className="login_logo"
   >
-    Swag Labs
+    Swag Labs v3
   </div>
   <div
     className="login_wrapper"
