@@ -64,7 +64,7 @@ function Login(props) {
         { username }
       );
       return setError(
-        "Username and password do not match any user in this service"
+        "Username and password do not match any user in this service."
       );
     }
 
