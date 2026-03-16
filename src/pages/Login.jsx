@@ -81,7 +81,7 @@ function Login(props) {
 
   return (
     <div className="login_container">
-      <div className="login_logo">Swag Labs v3</div>
+      <div className="login_logo">Swag Labs</div>
 
       <div className="login_wrapper" data-test="login-container">
         <div className="login_wrapper-inner">
