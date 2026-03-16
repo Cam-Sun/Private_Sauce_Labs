@@ -1,4 +1,4 @@
-name: E2E Tests & Deploy
+name: Pipeline
 
 on:
   push:
@@ -7,8 +7,30 @@ on:
     branches: [main]
 
 jobs:
-  # ── CI: Run Cucumber E2E tests ────────────────────────────────────────────
-  e2e:
+  # ── Job 1: Unit Tests ─────────────────────────────────────────────────────
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: CI=false npm run build
+
+      - name: Run unit tests and generate coverage report
+        run: npm run test.coverage
+
+  # ── Job 2: E2E Tests ──────────────────────────────────────────────────────
+  e2e-tests:
+    needs: unit-tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout app
@@ -59,9 +81,9 @@ jobs:
           name: cucumber-report
           path: e2e-tests/reports/
 
-  # ── CD: Deploy to GitHub Pages (push to main only) ───────────────────────
+  # ── Job 3: Deploy (push to main only) ────────────────────────────────────
   deploy:
-    needs: e2e
+    needs: e2e-tests
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
