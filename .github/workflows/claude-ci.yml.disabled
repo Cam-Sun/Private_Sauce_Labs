@@ -1,0 +1,140 @@
+name: CI with Claude
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # ── 1. Build & Test ────────────────────────────────────────────────────────
+  test:
+    runs-on: ubuntu-latest
+    outputs:
+      test_result: ${{ steps.run-tests.outputs.result }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: CI=false npm run build
+
+      - name: Run unit tests and generate coverage report
+        id: run-tests
+        continue-on-error: true
+        run: |
+          if npm run test.coverage 2>&1 | tee test-output.txt; then
+            echo "result=success" >> $GITHUB_OUTPUT
+          else
+            echo "result=failure" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload test output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output
+          path: test-output.txt
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # ── 2a. Tests passed → Claude posts coverage summary ──────────────────────
+  claude-report:
+    needs: test
+    if: needs.test.outputs.test_result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download test output
+        uses: actions/download-artifact@v4
+        with:
+          name: test-output
+
+      - name: Post coverage summary as PR comment
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            All tests passed. Here is the full test output including the coverage report:
+
+            $(cat test-output.txt)
+
+            Please post a concise PR comment summarising:
+            - Overall pass/fail count
+            - Coverage percentages (statements, branches, functions, lines)
+            - Any coverage gaps worth noting
+            Keep it brief and developer-friendly.
+          claude_args: "--max-turns 3"
+
+  # ── 2b. Tests failed → Claude self-heals ──────────────────────────────────
+  claude-fix:
+    needs: test
+    if: needs.test.outputs.test_result == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download test output
+        uses: actions/download-artifact@v4
+        with:
+          name: test-output
+
+      - name: Configure Git
+        run: |
+          git config user.name "Claude"
+          git config user.email "claude@anthropic.com"
+
+      - name: Analyse failures and self-heal
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            The test suite failed on this PR. Here is the full output:
+
+            $(cat test-output.txt)
+
+            Please:
+            1. Identify the root cause of each failure
+            2. Fix the test scripts only — do not modify any source code
+            3. Re-run `npm run test.coverage` to verify all tests pass
+            4. Commit the fix with a clear commit message
+            5. Post a PR comment explaining what was wrong in the tests and what you changed
+
+            Scope: test files only (e.g. files in src/**/*.test.js or src/**/*.spec.js).
+            Do not touch application source code under any circumstances.
+          claude_args: "--max-turns 10 --allowedTools Edit,Bash,Read,Glob,Grep"
+
+      - name: Push fixes to PR branch
+        if: always()
+        run: |
+          if git diff-index --quiet HEAD --; then
+            echo "No changes to push"
+          else
+            git push origin HEAD:${{ github.head_ref }}
+          fi
