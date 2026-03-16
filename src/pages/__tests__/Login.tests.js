@@ -175,7 +175,7 @@ describe("Login", () => {
     expect(setState).toHaveBeenCalledTimes(3);
     expect(setState).toHaveBeenNthCalledWith(
       3,
-      "Username and password do not match any user in this service"
+      "Username and password do not match any user in this service."
     );
 
     verifyCredentialsSpy.mockClear();
