@@ -35,8 +35,7 @@ jobs:
         with:
           repository: Cam-Sun/private_labs_test
           path: e2e-tests
-          # If private_labs_test is a private repo, add:
-          # token: ${{ secrets.TESTS_REPO_TOKEN }}
+          token: ${{ secrets.TESTS_REPO_TOKEN }}
 
       - name: Install test dependencies
         working-directory: e2e-tests
