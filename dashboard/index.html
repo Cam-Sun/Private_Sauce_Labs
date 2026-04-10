@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="3600">
+  <title>Swag Labs — Test Dashboard</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #e6edf3; min-height: 100vh; }
+
+    /* Header */
+    header { background: #161b22; border-bottom: 1px solid #30363d; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .header-title h1 { font-size: 1.25rem; font-weight: 600; }
+    .header-title p  { font-size: 0.78rem; color: #8b949e; margin-top: 2px; }
+    .badge img { height: 22px; vertical-align: middle; }
+
+    /* Layout */
+    main { max-width: 1140px; margin: 0 auto; padding: 20px; display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .col-12 { grid-column: span 12; }
+    .col-6  { grid-column: span 6; }
+    .col-4  { grid-column: span 4; }
+    @media (max-width: 700px) { .col-6, .col-4 { grid-column: span 12; } }
+
+    /* Cards */
+    .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 18px; }
+    .card h2 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: #8b949e; margin-bottom: 14px; }
+
+    /* Health Score */
+    .score-value { font-size: 3.2rem; font-weight: 700; line-height: 1; }
+    .score-label { font-size: 0.9rem; margin-top: 6px; }
+    .green { color: #3fb950; } .yellow { color: #d29922; } .red { color: #f85149; }
+
+    /* E2E summary */
+    .e2e-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; text-align: center; }
+    .e2e-stat { background: #21262d; border-radius: 6px; padding: 10px 6px; }
+    .e2e-stat .n { font-size: 1.7rem; font-weight: 700; }
+    .e2e-stat .l { font-size: 0.72rem; color: #8b949e; margin-top: 2px; }
+    .e2e-stat.p .n { color: #3fb950; }
+    .e2e-stat.f .n { color: #f85149; }
+    ul.scenarios { list-style: none; font-size: 0.85rem; }
+    ul.scenarios li { padding: 5px 0; border-bottom: 1px solid #21262d; }
+    ul.scenarios li:last-child { border-bottom: none; }
+
+    /* Coverage table */
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 7px 8px; color: #8b949e; font-weight: 500; border-bottom: 1px solid #30363d; }
+    td { padding: 7px 8px; border-bottom: 1px solid #21262d; }
+    tr:last-child td { border-bottom: none; }
+    .bar { background: #21262d; border-radius: 4px; height: 7px; width: 110px; }
+    .bar-fill { height: 100%; border-radius: 4px; }
+    .bar-fill.green { background: #3fb950; } .bar-fill.yellow { background: #d29922; } .bar-fill.red { background: #f85149; }
+
+    /* Pipeline jobs */
+    .jobs { display: flex; gap: 12px; flex-wrap: wrap; }
+    .job { background: #21262d; border-radius: 6px; padding: 10px 16px; min-width: 130px; font-size: 0.82rem; }
+    .job .jname { color: #8b949e; margin-bottom: 4px; }
+    .job .jstatus { font-weight: 600; }
+    .job.success .jstatus { color: #3fb950; }
+    .job.failure .jstatus { color: #f85149; }
+    .job.in_progress .jstatus { color: #d29922; }
+    .job.queued .jstatus { color: #8b949e; }
+
+    /* Suggestions */
+    .suggestion { border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid; }
+    .suggestion.high   { background: rgba(248,81,73,.1);  border-color: #f85149; }
+    .suggestion.medium { background: rgba(210,153,34,.1); border-color: #d29922; }
+    .suggestion.ok     { background: rgba(63,185,80,.1);  border-color: #3fb950; color: #3fb950; }
+    .s-header { font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; }
+    .s-detail { color: #8b949e; font-size: 0.8rem; margin-bottom: 4px; }
+    .s-action { font-size: 0.8rem; color: #58a6ff; }
+
+    .muted { color: #8b949e; font-style: italic; text-align: center; padding: 10px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <h1>🧪 Swag Labs — Test Dashboard</h1>
+    <p>Last updated: 10 Apr 2026, 20:35 UTC &nbsp;|&nbsp; Auto-refreshes every 60 min</p>
+  </div>
+  <a href="https://github.com/Cam-Sun/Private_Sauce_Labs/actions" target="_blank" rel="noopener" class="badge">
+    <img src="https://github.com/Cam-Sun/Private_Sauce_Labs/actions/workflows/pipeline.yml/badge.svg" alt="Pipeline status">
+  </a>
+</header>
+
+<main>
+
+  <!-- Pipeline Status -->
+  <div class="card col-12">
+    <h2>⚡ Pipeline Status</h2>
+    <div class="jobs" id="pipeline-jobs">
+      <div class="job queued"><div class="jname">unit-tests</div><div class="jstatus">Loading…</div></div>
+      <div class="job queued"><div class="jname">e2e-tests</div><div class="jstatus">Loading…</div></div>
+      <div class="job queued"><div class="jname">deploy</div><div class="jstatus">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- Health Score -->
+  <div class="card col-4">
+    <h2>🏆 Test Health Score</h2>
+    <div class="score-value red">60<span style="font-size:1.1rem;color:#8b949e"> / 100</span></div>
+    <div class="score-label red">Critical</div>
+  </div>
+
+  <!-- E2E Summary -->
+  <div class="card col-4">
+    <h2>✅ E2E Results</h2>
+    <div class="e2e-grid">
+      <div class="e2e-stat">  <div class="n">6</div>  <div class="l">Total</div></div>
+      <div class="e2e-stat p"><div class="n">6</div> <div class="l">Passed</div></div>
+      <div class="e2e-stat f"><div class="n">0</div> <div class="l">Failed</div></div>
+      <div class="e2e-stat">  <div class="n">0</div><div class="l">Skipped</div></div>
+    </div>
+  </div>
+
+  <!-- Unit Test Coverage -->
+  <div class="card col-4">
+    <h2>📊 Unit Test Coverage</h2>
+    <table>
+      <thead><tr><th>Metric</th><th>Coverage</th><th>%</th><th></th></tr></thead>
+      <tbody><tr><td colspan="4" class="muted">Coverage data unavailable</td></tr></tbody>
+    </table>
+  </div>
+
+  <!-- E2E Scenarios -->
+  <div class="card col-6">
+    <h2>🧪 E2E Scenarios</h2>
+    <ul class="scenarios"><li class="scenario passed">✅ Successful login with standard user</li><li class="scenario passed">✅ Locked out user cannot log in</li><li class="scenario passed">✅ Login fails with invalid credentials</li><li class="scenario passed">✅ Login fails with empty username</li><li class="scenario passed">✅ Login fails with empty password</li><li class="scenario passed">✅ User can log out after logging in</li></ul>
+  </div>
+
+  <!-- Pipeline History -->
+  <div class="card col-6">
+    <h2>📅 Pipeline History (last 5 runs)</h2>
+    <table>
+      <thead><tr><th>Date</th><th>Status</th><th>Score</th><th>E2E</th><th>Coverage</th></tr></thead>
+      <tbody><tr>
+          <td>10 Apr</td>
+          <td>✅ Pass</td>
+          <td>60</td>
+          <td>6/6</td>
+          <td>0%</td>
+        </tr></tbody>
+    </table>
+  </div>
+
+  <!-- Improvement Suggestions -->
+  <div class="card col-12">
+    <h2>💡 Improvement Suggestions</h2>
+    <div class="suggestion high">
+          <div class="s-header">🔴 HIGH — 4 user types with no E2E coverage</div>
+          <div class="s-detail">problem_user, performance_glitch_user, error_user, visual_user</div>
+          <div class="s-action">→ Add scenarios for each user type to features/login.feature</div>
+        </div><div class="suggestion medium">
+          <div class="s-header">🟡 MEDIUM — 3 application flows not tested</div>
+          <div class="s-detail">Inventory, Cart, Checkout</div>
+          <div class="s-action">→ Create feature files and step definitions for these flows</div>
+        </div>
+  </div>
+
+</main>
+
+<script>
+  /* Live pipeline status — GitHub API (no auth needed for public repo) */
+  const REPO = 'Cam-Sun/Private_Sauce_Labs';
+
+  async function updatePipelineStatus() {
+    try {
+      const runsRes  = await fetch('https://api.github.com/repos/' + REPO + '/actions/runs?per_page=1&branch=main', { headers: { Accept: 'application/vnd.github.v3+json' } });
+      const runsData = await runsRes.json();
+      if (!runsData.workflow_runs || !runsData.workflow_runs.length) return;
+
+      const run     = runsData.workflow_runs[0];
+      const jobsRes = await fetch('https://api.github.com/repos/' + REPO + '/actions/runs/' + run.id + '/jobs', { headers: { Accept: 'application/vnd.github.v3+json' } });
+      const jobsData = await jobsRes.json();
+      if (!jobsData.jobs) return;
+
+      const container = document.getElementById('pipeline-jobs');
+      container.innerHTML = jobsData.jobs.map(function(job) {
+        var s;
+        if (job.status === 'completed') {
+          s = job.conclusion === 'success' ? { cls: 'success', text: '✅ Passed' }
+            : job.conclusion === 'failure' ? { cls: 'failure', text: '❌ Failed' }
+            : { cls: 'queued', text: job.conclusion };
+        } else if (job.status === 'in_progress') {
+          s = { cls: 'in_progress', text: '⏳ Running…' };
+        } else {
+          s = { cls: 'queued', text: '⏳ Queued' };
+        }
+        var dur = '';
+        if (job.completed_at && job.started_at) {
+          dur = ' <span style="color:#8b949e;font-weight:400">' + Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 1000) + 's</span>';
+        }
+        return '<div class="job ' + s.cls + '"><div class="jname">' + job.name + '</div><div class="jstatus">' + s.text + dur + '</div></div>';
+      }).join('');
+    } catch (e) {
+      console.warn('Pipeline status unavailable:', e.message);
+    }
+  }
+
+  updatePipelineStatus();
+  setInterval(updatePipelineStatus, 30000); /* refresh every 30 s */
+</script>
+
+</body>
+</html>

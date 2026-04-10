@@ -1,0 +1,11 @@
+[
+  {
+    "runId": "24262465670",
+    "date": "2026-04-10T20:35:24.975Z",
+    "conclusion": "success",
+    "healthScore": 60,
+    "e2ePassed": 6,
+    "e2eTotal": 6,
+    "coverageAvg": 0
+  }
+]
