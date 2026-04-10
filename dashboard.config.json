@@ -1,0 +1,24 @@
+{
+  "dashboard": {
+    "title": "Swag Labs — Test Dashboard",
+    "refreshIntervalSeconds": 3600,
+    "historyRunsToDisplay": 5
+  },
+  "coverage": {
+    "thresholds": {
+      "green": 90,
+      "yellow": 70
+    }
+  },
+  "healthScore": {
+    "thresholds": {
+      "green": 85,
+      "yellow": 70
+    },
+    "weights": {
+      "unitCoverage": 0.4,
+      "e2ePassRate": 0.4,
+      "recentStability": 0.2
+    }
+  }
+}

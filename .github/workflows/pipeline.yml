@@ -28,6 +28,13 @@ jobs:
       - name: Run unit tests and generate coverage report
         run: npm run test.coverage
 
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/coverage-summary.json
+
   # ── Job 2: E2E Tests ──────────────────────────────────────────────────────
   e2e-tests:
     needs: unit-tests
@@ -102,6 +109,26 @@ jobs:
 
       - name: Build
         run: CI=false npm run build
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+        continue-on-error: true
+
+      - name: Download E2E report
+        uses: actions/download-artifact@v4
+        with:
+          name: cucumber-report
+          path: e2e-tests/reports
+        continue-on-error: true
+
+      - name: Generate dashboard
+        run: node scripts/generate-report.js
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
 
       - name: Deploy to GitHub Pages
         run: |
