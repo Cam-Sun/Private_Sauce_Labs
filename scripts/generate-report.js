@@ -81,12 +81,13 @@ function fetchHistory(repo) {
   const [owner, repoName] = repo.split('/');
   const url = `https://${owner.toLowerCase()}.github.io/${repoName.toLowerCase()}/history.json`;
   return new Promise((resolve) => {
-    https.get(url, (res) => {
-      if (res.statusCode !== 200) return resolve([]);
+    const req = https.get(url, (res) => {
+      if (res.statusCode !== 200) { res.resume(); return resolve([]); }
       let data = '';
       res.on('data', chunk => { data += chunk; });
       res.on('end', () => { try { resolve(JSON.parse(data)); } catch { resolve([]); } });
     }).on('error', () => resolve([]));
+    req.setTimeout(10000, () => { req.destroy(); resolve([]); });
   });
 }
 
