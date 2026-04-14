@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="3600">
+  <meta http-equiv="refresh" content="900">
   <title>Swag Labs — Test Dashboard</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -62,13 +62,17 @@
     .job.queued .jstatus { color: #8b949e; }
 
     /* Suggestions */
-    .suggestion { border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid; }
+    .suggestion { border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid; transition: filter 0.15s, transform 0.15s; }
     .suggestion.high   { background: rgba(248,81,73,.1);  border-color: #f85149; }
     .suggestion.medium { background: rgba(210,153,34,.1); border-color: #d29922; }
     .suggestion.ok     { background: rgba(63,185,80,.1);  border-color: #3fb950; color: #3fb950; }
+    .suggestion.clickable { cursor: pointer; }
+    .suggestion-link { display: block; text-decoration: none; color: inherit; }
+    .suggestion-link:hover .suggestion { filter: brightness(1.15); transform: translateX(3px); }
     .s-header { font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; }
     .s-detail { color: #8b949e; font-size: 0.8rem; margin-bottom: 4px; }
     .s-action { font-size: 0.8rem; color: #58a6ff; }
+    .s-link-icon { font-size: 0.75rem; opacity: 0.7; }
 
     .muted { color: #8b949e; font-style: italic; text-align: center; padding: 10px; }
   </style>
@@ -78,7 +82,7 @@
 <header>
   <div class="header-title">
     <h1>🧪 Swag Labs — Test Dashboard</h1>
-    <p>Last updated: 10 Apr 2026, 20:35 UTC &nbsp;|&nbsp; Auto-refreshes every 60 min</p>
+    <p>Last updated: 14 Apr 2026, 21:10 UTC &nbsp;|&nbsp; Auto-refreshes every 15 min</p>
   </div>
   <a href="https://github.com/Cam-Sun/Private_Sauce_Labs/actions" target="_blank" rel="noopener" class="badge">
     <img src="https://github.com/Cam-Sun/Private_Sauce_Labs/actions/workflows/pipeline.yml/badge.svg" alt="Pipeline status">
@@ -100,8 +104,8 @@
   <!-- Health Score -->
   <div class="card col-4">
     <h2>🏆 Test Health Score</h2>
-    <div class="score-value red">60<span style="font-size:1.1rem;color:#8b949e"> / 100</span></div>
-    <div class="score-label red">Critical</div>
+    <div class="score-value green">100<span style="font-size:1.1rem;color:#8b949e"> / 100</span></div>
+    <div class="score-label green">Excellent</div>
   </div>
 
   <!-- E2E Summary -->
@@ -120,7 +124,27 @@
     <h2>📊 Unit Test Coverage</h2>
     <table>
       <thead><tr><th>Metric</th><th>Coverage</th><th>%</th><th></th></tr></thead>
-      <tbody><tr><td colspan="4" class="muted">Coverage data unavailable</td></tr></tbody>
+      <tbody><tr>
+          <td>Statements</td>
+          <td><div class="bar"><div class="bar-fill green" style="width:100%"></div></div></td>
+          <td class="green">100%</td>
+          <td>🟢</td>
+        </tr><tr>
+          <td>Branches</td>
+          <td><div class="bar"><div class="bar-fill green" style="width:100%"></div></div></td>
+          <td class="green">100%</td>
+          <td>🟢</td>
+        </tr><tr>
+          <td>Functions</td>
+          <td><div class="bar"><div class="bar-fill green" style="width:100%"></div></div></td>
+          <td class="green">100%</td>
+          <td>🟢</td>
+        </tr><tr>
+          <td>Lines</td>
+          <td><div class="bar"><div class="bar-fill green" style="width:100%"></div></div></td>
+          <td class="green">100%</td>
+          <td>🟢</td>
+        </tr></tbody>
     </table>
   </div>
 
@@ -136,11 +160,11 @@
     <table>
       <thead><tr><th>Date</th><th>Status</th><th>Score</th><th>E2E</th><th>Coverage</th></tr></thead>
       <tbody><tr>
-          <td>10 Apr</td>
+          <td>14 Apr</td>
           <td>✅ Pass</td>
-          <td>60</td>
+          <td>100</td>
           <td>6/6</td>
-          <td>0%</td>
+          <td>100%</td>
         </tr></tbody>
     </table>
   </div>
@@ -148,15 +172,15 @@
   <!-- Improvement Suggestions -->
   <div class="card col-12">
     <h2>💡 Improvement Suggestions</h2>
-    <div class="suggestion high">
+    <a href="https://github.com/Cam-Sun/private_labs_test/blob/main/features/login.feature" target="_blank" rel="noopener" class="suggestion-link"><div class="suggestion high clickable">
           <div class="s-header">🔴 HIGH — 4 user types with no E2E coverage</div>
           <div class="s-detail">problem_user, performance_glitch_user, error_user, visual_user</div>
-          <div class="s-action">→ Add scenarios for each user type to features/login.feature</div>
-        </div><div class="suggestion medium">
+          <div class="s-action">→ Add scenarios for each user type to features/login.feature <span class="s-link-icon">↗</span></div>
+        </div></a><a href="https://github.com/Cam-Sun/private_labs_test/tree/main/features" target="_blank" rel="noopener" class="suggestion-link"><div class="suggestion medium clickable">
           <div class="s-header">🟡 MEDIUM — 3 application flows not tested</div>
           <div class="s-detail">Inventory, Cart, Checkout</div>
-          <div class="s-action">→ Create feature files and step definitions for these flows</div>
-        </div>
+          <div class="s-action">→ Create feature files and step definitions for these flows <span class="s-link-icon">↗</span></div>
+        </div></a>
   </div>
 
 </main>
@@ -164,6 +188,7 @@
 <script>
   /* Live pipeline status — GitHub API (no auth needed for public repo) */
   const REPO = 'Cam-Sun/Private_Sauce_Labs';
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   async function updatePipelineStatus() {
     try {
@@ -192,7 +217,7 @@
         if (job.completed_at && job.started_at) {
           dur = ' <span style="color:#8b949e;font-weight:400">' + Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 1000) + 's</span>';
         }
-        return '<div class="job ' + s.cls + '"><div class="jname">' + job.name + '</div><div class="jstatus">' + s.text + dur + '</div></div>';
+        return '<div class="job ' + s.cls + '"><div class="jname">' + esc(job.name) + '</div><div class="jstatus">' + s.text + dur + '</div></div>';
       }).join('');
     } catch (e) {
       console.warn('Pipeline status unavailable:', e.message);
