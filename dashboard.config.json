@@ -1,8 +1,9 @@
 {
   "dashboard": {
     "title": "Swag Labs — Test Dashboard",
-    "refreshIntervalSeconds": 3600,
-    "historyRunsToDisplay": 5
+    "refreshIntervalSeconds": 900,
+    "historyRunsToDisplay": 5,
+    "testRepo": "Cam-Sun/private_labs_test"
   },
   "coverage": {
     "thresholds": {

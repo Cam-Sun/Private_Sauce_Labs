@@ -79,7 +79,7 @@ function readE2E() {
 // ── History ────────────────────────────────────────────────────────────────
 function fetchHistory(repo) {
   const [owner, repoName] = repo.split('/');
-  const url = `https://${owner}.github.io/${repoName}/history.json`;
+  const url = `https://${owner.toLowerCase()}.github.io/${repoName.toLowerCase()}/history.json`;
   return new Promise((resolve) => {
     https.get(url, (res) => {
       if (res.statusCode !== 200) return resolve([]);
@@ -116,7 +116,10 @@ function calculateHealthScore(coverage, e2e, history) {
 const KNOWN_USER_TYPES     = ['standard_user', 'locked_out_user', 'problem_user', 'performance_glitch_user', 'error_user', 'visual_user'];
 const EXPECTED_FEATURES    = ['Login', 'Inventory', 'Cart', 'Checkout'];
 
-function generateSuggestions(coverage, e2e) {
+function generateSuggestions(coverage, e2e, repo, testRepo) {
+  const gh         = 'https://github.com';
+  const testBase   = `${gh}/${testRepo}`;
+  const appBase    = `${gh}/${repo}`;
   const suggestions = [];
 
   // 1. Failed scenarios — HIGH
@@ -127,6 +130,7 @@ function generateSuggestions(coverage, e2e) {
       title:    `${failed.length} failing scenario${failed.length > 1 ? 's' : ''}`,
       detail:   failed.map(s => s.name).join(', '),
       action:   'Investigate and fix failing tests before adding new ones',
+      link:     `${appBase}/actions`,
     });
   }
 
@@ -138,6 +142,7 @@ function generateSuggestions(coverage, e2e) {
       title:    `${untested.length} user type${untested.length > 1 ? 's' : ''} with no E2E coverage`,
       detail:   untested.join(', '),
       action:   'Add scenarios for each user type to features/login.feature',
+      link:     `${testBase}/blob/main/features/login.feature`,
     });
   }
 
@@ -152,6 +157,7 @@ function generateSuggestions(coverage, e2e) {
       title:    `${missing.length} application flow${missing.length > 1 ? 's' : ''} not tested`,
       detail:   missing.join(', '),
       action:   'Create feature files and step definitions for these flows',
+      link:     `${testBase}/tree/main/features`,
     });
   }
 
@@ -163,6 +169,7 @@ function generateSuggestions(coverage, e2e) {
       title:    `${skipped.length} scenario${skipped.length > 1 ? 's' : ''} skipped or pending`,
       detail:   skipped.map(s => s.name).join(', '),
       action:   'Implement pending step definitions or re-enable skipped scenarios',
+      link:     `${testBase}/tree/main/features`,
     });
   }
 
@@ -176,6 +183,7 @@ function generateSuggestions(coverage, e2e) {
         title:    `Unit coverage below ${config.coverage.thresholds.green}% threshold`,
         detail:   gaps.map(m => `${m}: ${coverage[m]}%`).join(', '),
         action:   'Add unit tests to cover untested branches and functions',
+        link:     `${appBase}/tree/main/src`,
       });
     }
   }
@@ -249,11 +257,14 @@ function renderHTML(coverage, e2e, history, healthScore, suggestions, repo) {
   const suggestionCards = suggestions.length > 0
     ? suggestions.map(s => {
         const icon = s.priority === 'high' ? '🔴' : '🟡';
-        return `<div class="suggestion ${s.priority}">
+        const card = `<div class="suggestion ${s.priority}${s.link ? ' clickable' : ''}">
           <div class="s-header">${icon} ${s.priority.toUpperCase()} — ${escapeHtml(s.title)}</div>
           <div class="s-detail">${escapeHtml(s.detail)}</div>
-          <div class="s-action">→ ${escapeHtml(s.action)}</div>
+          <div class="s-action">→ ${escapeHtml(s.action)}${s.link ? ' <span class="s-link-icon">↗</span>' : ''}</div>
         </div>`;
+        return s.link
+          ? `<a href="${escapeHtml(s.link)}" target="_blank" rel="noopener" class="suggestion-link">${card}</a>`
+          : card;
       }).join('')
     : '<div class="suggestion ok">✅ Test suite looks healthy — no improvements flagged</div>';
 
@@ -321,13 +332,17 @@ function renderHTML(coverage, e2e, history, healthScore, suggestions, repo) {
     .job.queued .jstatus { color: #8b949e; }
 
     /* Suggestions */
-    .suggestion { border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid; }
+    .suggestion { border-radius: 6px; padding: 12px 14px; margin-bottom: 10px; border-left: 3px solid; transition: filter 0.15s, transform 0.15s; }
     .suggestion.high   { background: rgba(248,81,73,.1);  border-color: #f85149; }
     .suggestion.medium { background: rgba(210,153,34,.1); border-color: #d29922; }
     .suggestion.ok     { background: rgba(63,185,80,.1);  border-color: #3fb950; color: #3fb950; }
+    .suggestion.clickable { cursor: pointer; }
+    .suggestion-link { display: block; text-decoration: none; color: inherit; }
+    .suggestion-link:hover .suggestion { filter: brightness(1.15); transform: translateX(3px); }
     .s-header { font-weight: 600; font-size: 0.85rem; margin-bottom: 5px; }
     .s-detail { color: #8b949e; font-size: 0.8rem; margin-bottom: 4px; }
     .s-action { font-size: 0.8rem; color: #58a6ff; }
+    .s-link-icon { font-size: 0.75rem; opacity: 0.7; }
 
     .muted { color: #8b949e; font-style: italic; text-align: center; padding: 10px; }
   </style>
@@ -409,6 +424,7 @@ function renderHTML(coverage, e2e, history, healthScore, suggestions, repo) {
 <script>
   /* Live pipeline status — GitHub API (no auth needed for public repo) */
   const REPO = '${repo}';
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   async function updatePipelineStatus() {
     try {
@@ -437,7 +453,7 @@ function renderHTML(coverage, e2e, history, healthScore, suggestions, repo) {
         if (job.completed_at && job.started_at) {
           dur = ' <span style="color:#8b949e;font-weight:400">' + Math.round((new Date(job.completed_at) - new Date(job.started_at)) / 1000) + 's</span>';
         }
-        return '<div class="job ' + s.cls + '"><div class="jname">' + job.name + '</div><div class="jstatus">' + s.text + dur + '</div></div>';
+        return '<div class="job ' + s.cls + '"><div class="jname">' + esc(job.name) + '</div><div class="jstatus">' + s.text + dur + '</div></div>';
       }).join('');
     } catch (e) {
       console.warn('Pipeline status unavailable:', e.message);
@@ -454,16 +470,16 @@ function renderHTML(coverage, e2e, history, healthScore, suggestions, repo) {
 
 // ── Main ───────────────────────────────────────────────────────────────────
 async function main() {
-  const repo = process.env.GITHUB_REPOSITORY || 'Cam-Sun/Private_Sauce_Labs';
+  const repo     = process.env.GITHUB_REPOSITORY || 'Cam-Sun/Private_Sauce_Labs';
+  const testRepo = config.dashboard.testRepo || 'Cam-Sun/private_labs_test';
   console.log('📊 Generating test dashboard...');
 
   const coverage    = readCoverage();
   const e2e         = readE2E();
   const history     = await fetchHistory(repo);
-  const healthScore = calculateHealthScore(coverage, e2e, history);
-  const suggestions = generateSuggestions(coverage, e2e);
+  const suggestions = generateSuggestions(coverage, e2e, repo, testRepo);
 
-  // Append current run to history
+  // Append current run before calculating health score so stability includes this run
   const coverageAvg = coverage.available
     ? Math.round((coverage.statements + coverage.branches + coverage.functions + coverage.lines) / 4 * 10) / 10
     : 0;
@@ -472,11 +488,14 @@ async function main() {
     runId:       process.env.GITHUB_RUN_ID || 'local',
     date:        new Date().toISOString(),
     conclusion:  e2e.failed > 0 ? 'failure' : 'success',
-    healthScore,
+    healthScore: 0,
     e2ePassed:   e2e.passed,
     e2eTotal:    e2e.total,
     coverageAvg,
   });
+
+  const healthScore = calculateHealthScore(coverage, e2e, history);
+  history[history.length - 1].healthScore = healthScore;
 
   const trimmed = history.slice(-config.dashboard.historyRunsToDisplay);
 
