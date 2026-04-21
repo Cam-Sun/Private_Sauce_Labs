@@ -63,6 +63,7 @@ jobs:
         run: CI=false npm run build
         env:
           PUBLIC_URL: /Private_Sauce_Labs/staging
+          REACT_APP_DISABLE_SW: true
 
       - name: Deploy to staging
         run: |
