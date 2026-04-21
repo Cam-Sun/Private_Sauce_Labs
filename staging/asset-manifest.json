@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Private_Sauce_Labs/staging/static/css/main.5e606550.css",
-    "main.js": "/Private_Sauce_Labs/staging/static/js/main.9a427570.js",
+    "main.js": "/Private_Sauce_Labs/staging/static/js/main.820c4464.js",
     "static/media/sl-404.jpg": "/Private_Sauce_Labs/staging/static/media/sl-404.168b1cce10384b857a6f.jpg",
     "service-worker.js": "/Private_Sauce_Labs/staging/service-worker.js",
     "static/media/sauce-pullover-1200x1500.jpg": "/Private_Sauce_Labs/staging/static/media/sauce-pullover-1200x1500.51d7ffaf301e698772c8.jpg",
@@ -18,10 +18,10 @@
     "static/media/filter3x.svg": "/Private_Sauce_Labs/staging/static/media/filter3x.2943df5bcabfd174febc.svg",
     "static/media/arrow3x.svg": "/Private_Sauce_Labs/staging/static/media/arrow3x.4b825b78b4bd5f987b7d.svg",
     "main.5e606550.css.map": "/Private_Sauce_Labs/staging/static/css/main.5e606550.css.map",
-    "main.9a427570.js.map": "/Private_Sauce_Labs/staging/static/js/main.9a427570.js.map"
+    "main.820c4464.js.map": "/Private_Sauce_Labs/staging/static/js/main.820c4464.js.map"
   },
   "entrypoints": [
     "static/css/main.5e606550.css",
-    "static/js/main.9a427570.js"
+    "static/js/main.820c4464.js"
   ]
 }
